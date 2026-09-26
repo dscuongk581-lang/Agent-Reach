@@ -43,13 +43,13 @@ but they are outside the OSGE default path.
 
 ## Handoff v0.1
 
-`agent_reach.osge_handoff` mirrors the public OSGE MCP v0.1 input limits:
+`agent_reach.osge_handoff` mirrors the public OSGE MCP v0.1 input limits exactly. String limits are measured as UTF-16 code units, matching TypeScript/Zod:
 
 - at most 128 evidence items
-- id: 256 characters
-- URL: 8192 characters
-- title: 2048 characters
-- text: 32768 characters
+- id: 256 UTF-16 code units
+- URL: 8192 UTF-16 code units
+- title: 2048 UTF-16 code units
+- text: 32768 UTF-16 code units
 - sponsored must be an explicit boolean supplied by the caller
 
 The handoff projects richer upstream result objects onto only the fields accepted
