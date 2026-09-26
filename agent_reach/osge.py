@@ -2,7 +2,8 @@
 """OSGE acquisition profile for Agent Reach.
 
 Resolve information-acquisition capabilities to healthy Agent Reach channels.
-This module never scores trust; filtering and trust belong to OSGE.
+This module never scores trust. It only routes acquisition and describes the
+handoff to OSGE's existing local MCP primitives.
 """
 
 from __future__ import annotations
@@ -11,6 +12,7 @@ from typing import Dict, List, Optional, Tuple
 
 from agent_reach.channels import get_channel
 from agent_reach.config import Config
+from agent_reach.osge_handoff import handoff_contract
 from agent_reach.utils.text import scrub_url_credentials
 
 OSGE_PROFILE = "osge-core-v1"
@@ -76,8 +78,7 @@ def get_osge_status(config: Optional[Config] = None) -> dict:
     return {
         "profile": OSGE_PROFILE,
         "channels": channels,
-        "trust_owner": "OSGE",
-        "trust_score": None,
+        "handoff": handoff_contract(),
     }
 
 
@@ -100,7 +101,6 @@ def resolve_capability(capability: str, config: Optional[Config] = None) -> dict
         "capability": key,
         "selected": selected,
         "candidates": candidates,
-        "next_stage": "osge-filter" if selected else None,
-        "trust_owner": "OSGE",
-        "trust_score": None,
+        "next_stage": "osge_filter" if selected else None,
+        "handoff": handoff_contract(),
     }
