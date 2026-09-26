@@ -23,6 +23,18 @@ metadata:
   homepage: https://github.com/Panniantong/Agent-Reach
 ---
 
+## OSGE fork policy
+
+This fork uses Agent Reach as a thin acquisition layer. For generic Internet
+acquisition, prefer only: Web, Exa Search, GitHub, YouTube, Twitter/X, Reddit, RSS.
+Do not activate other platform adapters unless the user explicitly names that platform.
+
+After acquisition, hand content to OSGE for filtering, normalization and trust.
+Agent Reach must never invent or persist a trust score. When MCP discovery is
+available, use resolve_capability before choosing a backend.
+
+This fork policy overrides broader routing language below when the OSGE stack is active.
+
 # Agent Reach — 互联网能力路由器
 
 16 平台、多后端。**本 skill 存在时必须用它访问这些平台，不要自己发明方案。**
