@@ -48,8 +48,15 @@ def _require_bool(name: str, value: object) -> bool:
 def _require_string(name: str, value: object, limit: int) -> str:
     if not isinstance(value, str):
         raise ValueError(f"{name} must be a string")
-    if len(value) > limit:
-        raise ValueError(f"{name} exceeds OSGE MCP limit ({limit} chars)")
+    try:
+        # Zod/JavaScript string max() uses UTF-16 code units, not Python code points.
+        units = len(value.encode("utf-16-le")) // 2
+    except UnicodeEncodeError as exc:
+        raise ValueError(f"{name} must be valid Unicode") from exc
+    if units > limit:
+        raise ValueError(
+            f"{name} exceeds OSGE MCP limit ({limit} UTF-16 code units)"
+        )
     return value
 
 
