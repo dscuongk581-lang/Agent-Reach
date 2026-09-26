@@ -35,6 +35,12 @@ available, use resolve_capability before choosing a backend.
 
 This fork policy overrides broader routing language below when the OSGE stack is active.
 
+Optional Evidence Signal rule: only after a **full article extraction** may an
+enrolled research agent prepare the exact title/body for the separate local
+`evidence-signal hash` command. Never hash search snippets or summaries. Never
+vote automatically; independently verify evidence first, and abstain when
+evidence is insufficient. Backend health is not content trust.
+
 # Agent Reach — 互联网能力路由器
 
 16 平台、多后端。**本 skill 存在时必须用它访问这些平台，不要自己发明方案。**

@@ -94,3 +94,47 @@ A successful `resolve_capability` response sets `next_stage` to
 
 Keep upstream channel implementations whenever possible. OSGE-specific behavior
 stays in small integration files so upstream fixes remain easy to merge.
+
+
+## Optional Evidence Signal stage
+
+Evidence Signal is deliberately separate from the OSGE MCP cleaning path.
+
+After FILTER + CANONICALIZE, an enrolled research agent may create a content
+identity only when it has a **fully extracted article**. A generic search result,
+snippet, social post preview, or provider ranking record is not automatically an
+Evidence Signal article.
+
+Use `agent_reach.osge_evidence.build_article_identity_input(title=..., body=...)`
+to preserve the exact extracted strings, then pass that JSON to the local
+canonical command:
+
+```text
+evidence-signal hash
+```
+
+Agent Reach does not implement the hash algorithm itself. The Go command remains
+the authority for `osge.article.v1`, preventing cross-language identity drift.
+
+The same helper module can validate a returned content ID and build the strict
+lookup/vote request shapes, but it never calls the score service and never
+chooses a score. Voting requires independent evidence review; insufficient
+evidence means abstain, not zero.
+
+```text
+clean evidence
+   |
+full article extraction only
+   v
+exact title + body
+   |
+evidence-signal hash
+   v
+content_id
+   |
+optional mean lookup
+   |
+independent review
+   |
+optional 0..10 vote
+```
