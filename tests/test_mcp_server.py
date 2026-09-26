@@ -99,3 +99,60 @@ def test_mcp_status_exception_credentials_are_scrubbed(monkeypatch):
     assert "password" not in text
     assert "top-secret" not in text
     assert "https://***@example.test/data?token=***" in text
+
+
+def test_mcp_exposes_osge_discovery_tools(monkeypatch):
+    _install_fake_mcp(monkeypatch)
+
+    class _Config:
+        def __init__(self, *, read_only=False):
+            self.read_only = read_only
+
+    class _AgentReach:
+        def __init__(self, config):
+            self.config = config
+
+        def doctor_report(self):
+            return "ok"
+
+    monkeypatch.setattr(mcp_server, "Config", _Config)
+    monkeypatch.setattr(mcp_server, "AgentReach", _AgentReach)
+
+    server = mcp_server.create_server()
+    tools = asyncio.run(server.list_tools_handler())
+    names = {tool.name for tool in tools}
+
+    assert {"get_status", "get_osge_status", "resolve_capability"} <= names
+
+
+def test_mcp_resolve_capability_uses_read_only_config(monkeypatch):
+    _install_fake_mcp(monkeypatch)
+    seen = {}
+
+    class _Config:
+        def __init__(self, *, read_only=False):
+            self.read_only = read_only
+
+    class _AgentReach:
+        def __init__(self, config):
+            self.config = config
+
+        def doctor_report(self):
+            return "ok"
+
+    def _resolve(capability, config):
+        seen["capability"] = capability
+        seen["read_only"] = config.read_only
+        return {"selected": {"channel": "web"}, "trust_score": None}
+
+    monkeypatch.setattr(mcp_server, "Config", _Config)
+    monkeypatch.setattr(mcp_server, "AgentReach", _AgentReach)
+    monkeypatch.setattr(mcp_server, "resolve_capability", _resolve)
+
+    server = mcp_server.create_server()
+    result = asyncio.run(
+        server.call_tool_handler("resolve_capability", {"capability": "read"})
+    )
+
+    assert seen == {"capability": "read", "read_only": True}
+    assert '"trust_score": null' in result[0].text
