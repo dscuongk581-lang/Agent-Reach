@@ -1,5 +1,10 @@
 <h1 align="center">👁️ Agent Reach</h1>
 
+> **OSGE fork profile:** this fork keeps upstream adapters for compatibility,
+> but the OSGE hot path is intentionally small: Web, Search, GitHub, YouTube,
+> Twitter/X, Reddit and RSS. Agent Reach only resolves acquisition; OSGE owns
+> filtering, normalization and trust scoring. See `docs/OSGE.md`.
+
 <p align="center">
   <strong>给你的 AI Agent 一键装上互联网能力</strong>
 </p>
