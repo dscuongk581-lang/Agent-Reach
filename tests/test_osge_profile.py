@@ -44,9 +44,9 @@ def test_resolve_prefers_ok_and_hands_off_to_osge(monkeypatch):
 
     assert result["selected"]["channel"] == "reddit"
     assert result["selected"]["active_backend"] == "rdt"
-    assert result["next_stage"] == "osge-filter"
-    assert result["trust_owner"] == "OSGE"
-    assert result["trust_score"] is None
+    assert result["next_stage"] == "osge_filter"
+    assert result["handoff"]["order"] == ["osge_filter", "osge_canonicalize"]
+    assert result["handoff"]["trust_score"] is None
 
 
 def test_resolve_uses_warn_as_degraded_candidate(monkeypatch):
@@ -57,7 +57,18 @@ def test_resolve_uses_warn_as_degraded_candidate(monkeypatch):
     )
     result = osge.resolve_capability("search", config=StubConfig())
     assert result["selected"]["status"] == "warn"
-    assert result["next_stage"] == "osge-filter"
+    assert result["next_stage"] == "osge_filter"
+
+
+def test_status_includes_same_fixed_handoff(monkeypatch):
+    monkeypatch.setattr(
+        osge,
+        "get_channel",
+        lambda name: StubChannel(name, status="ok", backend="candidate"),
+    )
+    result = osge.get_osge_status(config=StubConfig())
+    assert result["handoff"]["filter_tool"] == "osge_filter"
+    assert result["handoff"]["canonicalize_tool"] == "osge_canonicalize"
 
 
 def test_unknown_capability_fails_closed():
