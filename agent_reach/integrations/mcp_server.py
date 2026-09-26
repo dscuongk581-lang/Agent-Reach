@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-Agent Reach MCP Server — expose doctor/status as MCP tool.
+"""Agent Reach MCP server.
 
-Run: python -m agent_reach.integrations.mcp_server
-
-Agent Reach is an installer + doctor tool. For actual reading/searching,
-agents should call upstream tools directly (twitter-cli, yt-dlp, mcporter, etc.).
+The legacy get_status tool remains available. OSGE adds two thin discovery
+tools so agents can resolve acquisition capabilities without making Agent Reach
+a second execution or trust engine.
 """
 
 import asyncio
@@ -14,6 +12,7 @@ import sys
 
 from agent_reach.config import Config
 from agent_reach.core import AgentReach
+from agent_reach.osge import get_osge_status, resolve_capability
 from agent_reach.utils.text import scrub_url_credentials
 
 try:
@@ -43,9 +42,30 @@ def create_server():
     @server.list_tools()
     async def list_tools():
         return [
-            Tool(name="get_status",
-                 description="Get Agent Reach status: which channels are installed and active.",
-                 inputSchema={"type": "object", "properties": {}}),
+            Tool(
+                name="get_status",
+                description="Get legacy full Agent Reach doctor status.",
+                inputSchema={"type": "object", "properties": {}},
+            ),
+            Tool(
+                name="get_osge_status",
+                description="Get health for the small OSGE acquisition profile.",
+                inputSchema={"type": "object", "properties": {}},
+            ),
+            Tool(
+                name="resolve_capability",
+                description="Resolve a generic acquisition capability and hand off trust to OSGE.",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "capability": {
+                            "type": "string",
+                            "description": "read, web, search, code, github, video, youtube, social, twitter, reddit, feeds, or rss",
+                        }
+                    },
+                    "required": ["capability"],
+                },
+            ),
         ]
 
     @server.call_tool()
@@ -53,16 +73,24 @@ def create_server():
         try:
             if name == "get_status":
                 result = eyes.doctor_report()
+            elif name == "get_osge_status":
+                result = get_osge_status(config)
+            elif name == "resolve_capability":
+                result = resolve_capability(str(arguments.get("capability", "")), config)
             else:
                 result = f"Unknown tool: {name}"
 
-            text = json.dumps(result, ensure_ascii=False, indent=2) if isinstance(result, (dict, list)) else str(result)
+            text = (
+                json.dumps(result, ensure_ascii=False, indent=2)
+                if isinstance(result, (dict, list))
+                else str(result)
+            )
             return [TextContent(type="text", text=text)]
-        except Exception as e:
+        except Exception as exc:
             return [
                 TextContent(
                     type="text",
-                    text=f"Error: {scrub_url_credentials(e)}",
+                    text=f"Error: {scrub_url_credentials(exc)}",
                 )
             ]
 
