@@ -2,7 +2,7 @@
 """Strict caller-side handoff helpers for the OSGE MCP v0.1 contract.
 
 Agent Reach owns acquisition routing only. These helpers merely shape caller-
-suppled evidence for OSGE's existing local FILTER/CANONICALIZE primitives.
+supplied evidence for OSGE's existing local FILTER/CANONICALIZE primitives.
 They do not fetch, infer sponsorship, score trust, persist evidence, or contact
 a network.
 """
