@@ -100,3 +100,12 @@ def test_canonicalize_input_can_follow_filter_output():
             "https://example.com/b",
         ]
     }
+
+
+def test_filter_input_matches_javascript_utf16_limits():
+    # JavaScript/Zod counts astral emoji as two UTF-16 code units.
+    payload = build_filter_input([{"id": "😀" * 128}])
+    assert payload["items"][0]["id"] == "😀" * 128
+
+    with pytest.raises(ValueError):
+        build_filter_input([{"id": "😀" * 129}])
